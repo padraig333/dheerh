@@ -95,12 +95,79 @@ see [Running as a service](#running-as-a-service).
 
 **Firefox**
 
+The source `extension/manifest.json` is Chrome-flavoured (it uses a service
+worker). For Firefox, build the packaged version first (see
+[Building packaged extensions](#building-packaged-extensions)), then:
+
 1. Visit `about:debugging#/runtime/this-firefox`
-2. Click **Load Temporary Add-on…** and pick `extension/manifest.json`
+2. Click **Load Temporary Add-on…** and pick `dist/firefox/manifest.json`
+   (or the built `dist/auto-video-archiver-firefox.xpi`)
+
+Temporary add-ons are removed when Firefox restarts; for a permanent install
+see [signing](#permanent-install-in-firefox-signing).
 
 Click the toolbar icon to open the popup. It shows whether the helper is online,
 lets you toggle the extension on/off, set the watch threshold, and restrict it
 to (or block it from) specific sites.
+
+---
+
+## Building packaged extensions
+
+`build.py` (standard library only) packages the shared `extension/` sources
+into a correct build for each browser — Chrome needs a `service_worker`
+background, Firefox needs a `scripts` event page plus an add-on id:
+
+```bash
+python3 build.py
+```
+
+This writes to `dist/`:
+
+| Output                                   | For                                   |
+|------------------------------------------|---------------------------------------|
+| `dist/chrome/`                           | Chrome/Edge/Brave — **Load unpacked** |
+| `dist/auto-video-archiver-chrome.zip`    | Chrome Web Store upload               |
+| `dist/firefox/`                          | Firefox — **Load Temporary Add-on**   |
+| `dist/auto-video-archiver-firefox.xpi`   | Firefox install / AMO upload          |
+
+An `.xpi` is just a ZIP with `manifest.json` at the root, which is exactly what
+this produces.
+
+### Optional: lint with Mozilla's web-ext
+
+[`web-ext`](https://extensionworkshop.com/documentation/develop/web-ext-command-reference/)
+is the official tool for validating, running, and signing Firefox add-ons:
+
+```bash
+npx web-ext lint  --source-dir dist/firefox
+npx web-ext run   --source-dir dist/firefox   # launch Firefox with it loaded
+npx web-ext build --source-dir dist/firefox   # produces a validated .xpi
+```
+
+### Permanent install in Firefox (signing)
+
+Firefox **release** and **beta** only install extensions that Mozilla has
+signed. An unsigned `.xpi` can be used as a *Temporary Add-on* (gone on
+restart). For a permanent install you have two options:
+
+1. **Sign it via AMO** (recommended). Get API credentials from
+   <https://addons.mozilla.org/developers/addon/api/key/> and run:
+
+   ```bash
+   npx web-ext sign --source-dir dist/firefox \
+     --api-key   "$AMO_JWT_ISSUER" \
+     --api-secret "$AMO_JWT_SECRET" \
+     --channel unlisted        # signed for self-distribution, not public listing
+   ```
+
+   This returns a signed `.xpi` you can install permanently in normal Firefox.
+   The fixed add-on id in `build.py` (`auto-video-archiver@dheerh`) is what AMO
+   ties the signature to.
+
+2. **Use a build that doesn't enforce signing** — Firefox Developer Edition,
+   Nightly, or ESR — and set `xpinstall.signatures.required` to `false` in
+   `about:config`. Then install the unsigned `.xpi` directly.
 
 ---
 
