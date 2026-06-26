@@ -39,6 +39,7 @@ Edge, Brave and Firefox, and is easy to inspect/curl. It only listens on
 pipx install yt-dlp           # recommended
 pip install -U yt-dlp
 brew install yt-dlp           # macOS
+winget install yt-dlp.yt-dlp  # Windows
 ```
 
 `ffmpeg` is recommended too, so `yt-dlp` can merge the best video+audio streams:
@@ -46,6 +47,7 @@ brew install yt-dlp           # macOS
 ```bash
 brew install ffmpeg           # macOS
 sudo apt install ffmpeg       # Debian/Ubuntu
+winget install Gyan.FFmpeg    # Windows
 ```
 
 ### 2. Start the helper server
@@ -54,6 +56,16 @@ sudo apt install ffmpeg       # Debian/Ubuntu
 cd server
 python3 server.py --dir ~/Videos/Archive --port 8731
 ```
+
+On **Windows** use `python` (or `py`) and a Windows path:
+
+```powershell
+cd server
+python server.py --dir "$env:USERPROFILE\Videos\Archive" --port 8731
+```
+
+> The default `--dir` (`~/Videos/Archive`) already resolves to
+> `C:\Users\<you>\Videos\Archive` on Windows, so you can omit `--dir` entirely.
 
 Useful flags:
 
@@ -139,6 +151,21 @@ systemctl --user enable --now video-archiver
 
 **macOS (launchd)** — create a `~/Library/LaunchAgents/com.local.videoarchiver.plist`
 that runs `python3 .../server/server.py` with `RunAtLoad`.
+
+**Windows (Task Scheduler)** — run it at logon, hidden, with no console window.
+Use `pythonw.exe` (the windowless interpreter) so no terminal pops up:
+
+```powershell
+$py  = (Get-Command pythonw).Source
+$arg = "`"$PWD\server\server.py`" --dir `"$env:USERPROFILE\Videos\Archive`""
+$action  = New-ScheduledTaskAction -Execute $py -Argument $arg
+$trigger = New-ScheduledTaskTrigger -AtLogOn
+Register-ScheduledTask -TaskName "VideoArchiver" -Action $action -Trigger $trigger
+```
+
+Alternatively, drop a shortcut to `pythonw.exe "...\server.py"` in your Startup
+folder (`shell:startup`). To run it as a true background service, wrap it with
+[NSSM](https://nssm.cc/).
 
 ---
 
