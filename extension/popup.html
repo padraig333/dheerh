@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Auto Video Archiver</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font: 13px/1.4 system-ui, sans-serif;
+        width: 320px;
+        margin: 0;
+        padding: 12px 14px;
+      }
+      h1 { font-size: 15px; margin: 0 0 10px; }
+      label { display: block; margin: 10px 0 4px; font-weight: 600; }
+      input[type="text"], input[type="number"], textarea {
+        width: 100%; box-sizing: border-box; padding: 5px 6px;
+        border: 1px solid #8888; border-radius: 6px; background: transparent;
+        color: inherit; font: inherit;
+      }
+      textarea { resize: vertical; min-height: 38px; }
+      .row { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+      .switch { display: flex; align-items: center; gap: 8px; }
+      .status { font-size: 12px; padding: 4px 8px; border-radius: 6px; }
+      .ok { background: #2e7d3233; color: #2e7d32; }
+      .bad { background: #c6282833; color: #c62828; }
+      .muted { opacity: .7; font-size: 12px; }
+      button {
+        margin-top: 12px; padding: 6px 12px; border-radius: 6px;
+        border: 1px solid #8888; background: transparent; color: inherit; cursor: pointer;
+      }
+      button:hover { background: #8881; }
+      hr { border: none; border-top: 1px solid #8884; margin: 14px 0 8px; }
+      ul.history { list-style: none; margin: 0; padding: 0; max-height: 160px; overflow: auto; }
+      ul.history li { padding: 5px 0; border-bottom: 1px solid #8882; }
+      ul.history a { color: inherit; text-decoration: none; }
+      .tag { font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-right: 6px; }
+      .tag.queued { background: #1565c033; color: #1565c0; }
+      .tag.error { background: #c6282833; color: #c62828; }
+      .small { font-size: 11px; }
+    </style>
+  </head>
+  <body>
+    <h1>Auto Video Archiver</h1>
+
+    <div class="row">
+      <div class="switch">
+        <input type="checkbox" id="enabled" />
+        <label for="enabled" style="margin:0">Enabled</label>
+      </div>
+      <span id="serverStatus" class="status">checking…</span>
+    </div>
+
+    <label for="serverUrl">Helper server URL</label>
+    <input type="text" id="serverUrl" placeholder="http://127.0.0.1:8731" />
+
+    <label for="minWatchSeconds">Watch threshold (seconds)</label>
+    <input type="number" id="minWatchSeconds" min="0" step="1" />
+
+    <label for="allowlist">Only on these sites <span class="muted">(one per line, blank = all)</span></label>
+    <textarea id="allowlist" placeholder="youtube.com&#10;vimeo.com"></textarea>
+
+    <label for="blocklist">Never on these sites <span class="muted">(one per line)</span></label>
+    <textarea id="blocklist" placeholder="bank.com"></textarea>
+
+    <button id="save">Save settings</button>
+
+    <hr />
+    <div class="row">
+      <strong>Recent</strong>
+      <button id="clear" class="small" style="margin:0">Clear</button>
+    </div>
+    <ul class="history" id="history"></ul>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

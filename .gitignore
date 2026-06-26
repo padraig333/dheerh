@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Downloaded media / archive (don't commit your video library)
+*.mp4
+*.mkv
+*.webm
+*.m4a
+*.part
+.download-archive.txt
+Videos/
