@@ -189,7 +189,10 @@ queue.
 
 - **Enabled** — master on/off switch.
 - **Helper server URL** — defaults to `http://127.0.0.1:8731`.
-- **Watch threshold** — seconds of real playback before a download is triggered.
+- **Trigger instantly** — download the moment playback starts, ignoring the
+  watch threshold below.
+- **Watch threshold** — seconds of real playback before a download is triggered
+  (ignored when *Trigger instantly* is on).
 - **Only on these sites** — allowlist (blank = every site).
 - **Never on these sites** — blocklist (e.g. internal/sensitive sites).
 - **Recent** — the last downloads with status, links, and any errors.

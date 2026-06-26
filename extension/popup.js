@@ -2,6 +2,7 @@
 
 const SYNC_DEFAULTS = {
   enabled: true,
+  instant: false,
   serverUrl: "http://127.0.0.1:8731",
   minWatchSeconds: 5,
   allowlist: [],
@@ -11,13 +12,20 @@ const SYNC_DEFAULTS = {
 const $ = (id) => document.getElementById(id);
 const linesToList = (s) => s.split("\n").map((x) => x.trim()).filter(Boolean);
 
+// The watch threshold is irrelevant when instant mode is on.
+function syncInstantUI() {
+  $("minWatchSeconds").disabled = $("instant").checked;
+}
+
 async function load() {
   const s = await chrome.storage.sync.get(SYNC_DEFAULTS);
   $("enabled").checked = s.enabled;
+  $("instant").checked = s.instant;
   $("serverUrl").value = s.serverUrl;
   $("minWatchSeconds").value = s.minWatchSeconds;
   $("allowlist").value = (s.allowlist || []).join("\n");
   $("blocklist").value = (s.blocklist || []).join("\n");
+  syncInstantUI();
   checkServer(s.serverUrl);
   renderHistory();
 }
@@ -25,6 +33,7 @@ async function load() {
 async function save() {
   const values = {
     enabled: $("enabled").checked,
+    instant: $("instant").checked,
     serverUrl: $("serverUrl").value.trim() || SYNC_DEFAULTS.serverUrl,
     minWatchSeconds: Math.max(0, Number($("minWatchSeconds").value) || 0),
     allowlist: linesToList($("allowlist").value),
@@ -76,6 +85,7 @@ async function renderHistory() {
   }
 }
 
+$("instant").addEventListener("change", syncInstantUI);
 $("save").addEventListener("click", save);
 $("clear").addEventListener("click", async () => {
   await chrome.storage.local.set({ history: [] });

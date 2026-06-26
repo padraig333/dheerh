@@ -11,6 +11,8 @@
 
   const DEFAULTS = {
     enabled: true,
+    // Fire the download the moment playback starts, ignoring the threshold.
+    instant: false,
     // Seconds of real playback before a video counts as "watched".
     minWatchSeconds: 5,
     // Empty list = run everywhere. Otherwise only these hostnames (suffix match).
@@ -89,9 +91,15 @@
     if (video.dataset.avaTracked) return;
     video.dataset.avaTracked = "1";
 
+    // Instant mode: report as soon as the video actually starts playing.
+    video.addEventListener("playing", () => {
+      if (settings.instant) report(video);
+    });
+
     let last = null;
 
     const onTimeUpdate = () => {
+      if (settings.instant) return; // handled by the "playing" listener
       const now = video.currentTime;
       if (last !== null && !video.paused && !video.seeking) {
         const delta = now - last;
